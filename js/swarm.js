@@ -4,14 +4,14 @@
 
 //come global variables
 var sw = {
-    canvas:undefined,
+    canvas:undefined, //canvas for bezier's and opacity fading
     canvas2:undefined,
-    context:undefined,
+    context:undefined,//canvas for particles
     context2:undefined,
-    g:[],
-    totalGroups:5,
-    c:[],
-    totalParticles:100,
+    g:[], //array holding data for beziers
+    totalGroups:5, //how many swarms?
+    c:[], //array for holding all particles
+    totalParticles:100, //how many particles?
     pStart:[]
 }
 
@@ -34,12 +34,15 @@ function makeTwoCanvases(){
     sw.canvas.className = 'swarmCanvas';
     sw.canvas.style.position = 'absolute';
     sw.canvas.style.left = '0px';
-    sw.canvas.style.zindex = 200;
+    sw.canvas.style.zindex = 200; //I don't remember why I did this...
+
+    // keeping the canvas dimensions at 800x200 seems a good mix of
+    // keeping it fairly high-res while not killling the cpu
     sw.canvas.width = 800;
-    sw.canvas.height = sw.canvas.width*.25;
-    sw.canvas.style.top = '28%';
+    sw.canvas.height = sw.canvas.width*.25; // each canvas has aspect ratio 4:1
+    sw.canvas.style.top = '28%'; // 28 percent seemed to work well......
     document.body.appendChild(sw.canvas);
-    sw.canvas2 = sw.canvas.cloneNode(false);
+    sw.canvas2 = sw.canvas.cloneNode(false); //clones of each other
     document.body.appendChild(sw.canvas2);
     sw.context = sw.canvas.getContext('2d');
     sw.context2 = sw.canvas2.getContext('2d');
@@ -76,9 +79,8 @@ function masterDraw(){
 
     //update and draw the beziers
     for(i=0;i<sw.totalGroups;i++){
-        if(sw.g[i].restart){
-            var init = {
-            };
+        if(sw.g[i].restart){ // if it's gone off the screen, initialize it to the left of the screen
+            var init = {}; //optional params to pass it
             sw.g[i] = new Bez(init,sw.canvas);
         }
         sw.g[i].update(sw.canvas);
@@ -108,10 +110,12 @@ function clearScreen(){
     var oldArray = sw.context.getImageData(0,0,sw.canvas.width,sw.canvas.height);
     var len = oldArray.data.length;
     for(var d=3;d<len;d+=4){
+        //using getImageData and feedback on the Alpha pixels to create the fading effect
         oldArray.data[d] = Math.floor(oldArray.data[d]*.9999);
     }
     sw.context.putImageData(oldArray,0,0);
 
+    //the particle canvas simply get erased every time
     sw.context2.clearRect(sw.canvas2.width/3,0,sw.canvas2.width,sw.canvas2.height);
 }
 
